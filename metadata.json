@@ -1,0 +1,6 @@
+{
+  "name": "Finanzas Personales",
+  "description": "Aplicación minimalista y elegante para control de cuentas, tarjetas de crédito, gastos programados (cuotas/Tasa Cero), presupuestos, proyecciones y cambio de moneda en Costa Rica (CRC/USD).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
