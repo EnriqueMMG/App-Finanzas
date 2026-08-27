@@ -6,6 +6,7 @@ import {
   Landmark,
   Plus,
   Edit2,
+  Trash2,
   CheckCircle2,
   AlertCircle,
   TrendingDown,
@@ -28,6 +29,7 @@ export const ScheduledView: React.FC<ScheduledViewProps> = ({
 }) => {
   const {
     scheduledExpenses,
+    deleteScheduledExpense,
     creditCards,
     categories,
     payScheduledInstallment,
@@ -194,12 +196,26 @@ export const ScheduledView: React.FC<ScheduledViewProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onEditScheduled(item)}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => onEditScheduled(item)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Editar gasto programado"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Deseas eliminar el gasto programado "${item.title}"?`)) {
+                          deleteScheduledExpense(item.id);
+                        }
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Eliminar gasto programado"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Amount & Due Date */}
@@ -209,6 +225,15 @@ export const ScheduledView: React.FC<ScheduledViewProps> = ({
                     <p className="text-lg font-black text-slate-900 font-mono-num">
                       {formatCurrency(item.monthlyAmount, item.currency)}
                     </p>
+                    {item.currency === 'USD' ? (
+                      <p className="text-[10px] text-slate-500 font-mono-num">
+                        ≈ ₡{Math.round(item.monthlyAmount * exchangeRate.usdToCrc).toLocaleString('es-CR')} (T.C: ₡{exchangeRate.usdToCrc})
+                      </p>
+                    ) : displayCurrency === 'USD' ? (
+                      <p className="text-[10px] text-slate-500 font-mono-num">
+                        ≈ ${(item.monthlyAmount / exchangeRate.usdToCrc).toFixed(2)} USD
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="text-right text-xs">

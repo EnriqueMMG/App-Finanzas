@@ -6,6 +6,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Edit2,
+  Trash2,
   Calendar,
   AlertCircle,
   TrendingDown,
@@ -33,6 +34,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
     mainAccount,
     updateMainAccount,
     creditCards,
+    deleteCreditCard,
     displayCurrency,
     exchangeRate,
     transactions,
@@ -245,6 +247,17 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                         >
                           <Edit2 className="w-3 h-3" />
                         </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`¿Deseas eliminar la tarjeta ${card.name} (${card.bank})?`)) {
+                              deleteCreditCard(card.id);
+                            }
+                          }}
+                          className="p-1 rounded-lg bg-black/20 hover:bg-rose-600/90 text-white transition-colors"
+                          title="Eliminar tarjeta"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">
                           {card.currency}
                         </span>
@@ -260,7 +273,19 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                   <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
                       <div className="flex items-baseline justify-between">
-                        <span className="text-xs font-semibold text-slate-500">Saldo Usado (Deuda):</span>
+                        <div>
+                          <span className="text-xs font-semibold text-slate-500">Saldo Usado (Deuda):</span>
+                          {card.currency === 'USD' && (
+                            <p className="text-[11px] text-slate-500 font-mono-num">
+                              ≈ ₡{Math.round(card.currentBalanceUsed * exchangeRate.usdToCrc).toLocaleString('es-CR')}
+                            </p>
+                          )}
+                          {card.currency === 'CRC' && displayCurrency === 'USD' && (
+                            <p className="text-[11px] text-slate-500 font-mono-num">
+                              ≈ ${(card.currentBalanceUsed / exchangeRate.usdToCrc).toFixed(2)} USD
+                            </p>
+                          )}
+                        </div>
                         <span className="text-lg font-black text-rose-600 font-mono-num">
                           {formatCurrency(card.currentBalanceUsed, card.currency)}
                         </span>
@@ -270,7 +295,9 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[11px] text-slate-500">
                           <span>Uso del límite: {usagePercent}%</span>
-                          <span>Disponible: {formatCurrency(available, card.currency)}</span>
+                          <span title={`Límite: ${formatCurrency(card.creditLimit, card.currency)}`}>
+                            Disp: {formatCurrency(available, card.currency)}
+                          </span>
                         </div>
                         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div
@@ -279,6 +306,12 @@ export const AccountsView: React.FC<AccountsViewProps> = ({
                             }`}
                             style={{ width: `${usagePercent}%` }}
                           />
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono-num pt-0.5">
+                          <span>Límite total: {formatCurrency(card.creditLimit, card.currency)}</span>
+                          {card.currency === 'USD' && (
+                            <span>≈ ₡{Math.round(card.creditLimit * exchangeRate.usdToCrc).toLocaleString('es-CR')}</span>
+                          )}
                         </div>
                       </div>
 

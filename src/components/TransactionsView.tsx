@@ -375,9 +375,19 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenNewTx,
                       >
                         {isIncome ? '+' : '-'} {formatCurrency(tx.amount, tx.currency)}
                       </p>
-                      <span className="text-[10px] text-slate-400 uppercase font-bold">
-                        {tx.currency}
-                      </span>
+                      {tx.currency === 'USD' ? (
+                        <p className="text-[10px] text-slate-500 font-mono-num font-medium">
+                          ≈ ₡{Math.round(tx.amount * exchangeRate.usdToCrc).toLocaleString('es-CR')}
+                        </p>
+                      ) : displayCurrency === 'USD' ? (
+                        <p className="text-[10px] text-slate-500 font-mono-num font-medium">
+                          ≈ ${(tx.amount / exchangeRate.usdToCrc).toFixed(2)} USD
+                        </p>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 uppercase font-bold">
+                          {tx.currency}
+                        </span>
+                      )}
                     </div>
 
                     {/* Action buttons (Edit / Delete) */}

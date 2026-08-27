@@ -111,6 +111,7 @@ const MainApp: React.FC = () => {
               onOpenCardPay={handleOpenCardPay}
               onOpenAddCard={handleOpenAddCard}
               onOpenNewScheduled={handleOpenNewScheduled}
+              onEditTx={handleEditTx}
             />
           )}
 

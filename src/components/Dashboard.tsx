@@ -17,6 +17,8 @@ import {
   PieChart as PieChartIcon,
   DollarSign,
   CheckCircle,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import { useFinance } from '../context/FinanceContext';
 import { formatCurrency, convertCurrency, getCurrentYearMonth, getMonthName } from '../utils/currency';
@@ -28,6 +30,7 @@ interface DashboardProps {
   onOpenCardPay: (card: CreditCard) => void;
   onOpenAddCard: () => void;
   onOpenNewScheduled: () => void;
+  onEditTx?: (tx: Transaction) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -35,11 +38,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenCardPay,
   onOpenAddCard,
   onOpenNewScheduled,
+  onEditTx,
 }) => {
   const {
     mainAccount,
     creditCards,
     transactions,
+    deleteTransaction,
     scheduledExpenses,
     categories,
     displayCurrency,
@@ -435,7 +440,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   {/* Balance details */}
                   <div className="mt-3 space-y-1">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-xs text-slate-500">Saldo Usado:</span>
+                      <div>
+                        <span className="text-xs text-slate-500">Saldo Usado:</span>
+                        {card.currency === 'USD' && (
+                          <p className="text-[10px] text-slate-500 font-mono-num">
+                            ≈ ₡{Math.round(card.currentBalanceUsed * exchangeRate.usdToCrc).toLocaleString('es-CR')}
+                          </p>
+                        )}
+                      </div>
                       <span className="text-base font-extrabold text-rose-600 font-mono-num">
                         {formatCurrency(card.currentBalanceUsed, card.currency)}
                       </span>
@@ -507,7 +519,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 return (
                   <div
                     key={tx.id}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100/80"
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100/80 group cursor-pointer"
+                    onClick={() => onEditTx && onEditTx(tx)}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
@@ -538,21 +551,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <p
-                        className={`text-sm font-extrabold font-mono-num ${
-                          isIncome
-                            ? 'text-emerald-600'
-                            : isPayment
-                            ? 'text-indigo-600'
-                            : 'text-slate-900'
-                        }`}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-extrabold font-mono-num ${
+                            isIncome
+                              ? 'text-emerald-600'
+                              : isPayment
+                              ? 'text-indigo-600'
+                              : 'text-slate-900'
+                          }`}
+                        >
+                          {isIncome ? '+' : '-'} {formatCurrency(tx.amount, tx.currency)}
+                        </p>
+                        {tx.currency === 'USD' ? (
+                          <p className="text-[10px] text-slate-500 font-mono-num">
+                            ≈ ₡{Math.round(tx.amount * exchangeRate.usdToCrc).toLocaleString('es-CR')}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-slate-400">
+                            {tx.sourceType === 'MAIN_ACCOUNT' ? 'Cuenta Principal' : 'Tarjeta'}
+                          </p>
+                        )}
+                      </div>
+
+                      <div
+                        className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {isIncome ? '+' : '-'} {formatCurrency(tx.amount, tx.currency)}
-                      </p>
-                      <p className="text-[10px] text-slate-400">
-                        {tx.sourceType === 'MAIN_ACCOUNT' ? 'Cuenta Principal' : 'Tarjeta'}
-                      </p>
+                        {onEditTx && (
+                          <button
+                            onClick={() => onEditTx(tx)}
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-md"
+                            title="Editar movimiento"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (confirm('¿Deseas eliminar este movimiento? Los saldos se ajustarán automáticamente.')) {
+                              deleteTransaction(tx.id);
+                            }
+                          }}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"
+                          title="Eliminar movimiento"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

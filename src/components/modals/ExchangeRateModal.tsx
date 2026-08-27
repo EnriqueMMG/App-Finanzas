@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, RefreshCw, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, RefreshCw, DollarSign, ArrowRight, Info } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 
 interface ExchangeRateModalProps {
@@ -10,6 +10,12 @@ interface ExchangeRateModalProps {
 export const ExchangeRateModal: React.FC<ExchangeRateModalProps> = ({ isOpen, onClose }) => {
   const { exchangeRate, updateExchangeRate } = useFinance();
   const [rate, setRate] = useState<string>(exchangeRate.usdToCrc.toString());
+
+  useEffect(() => {
+    if (isOpen) {
+      setRate(exchangeRate.usdToCrc.toString());
+    }
+  }, [isOpen, exchangeRate.usdToCrc]);
 
   if (!isOpen) return null;
 
@@ -22,7 +28,8 @@ export const ExchangeRateModal: React.FC<ExchangeRateModalProps> = ({ isOpen, on
     }
   };
 
-  const quickRates = [515, 520, 522.5, 525, 530];
+  const quickRates = [510, 515, 520, 525, 530];
+  const numRate = parseFloat(rate) || exchangeRate.usdToCrc;
 
   return (
     <div id="modal-backdrop-fx" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -70,6 +77,20 @@ export const ExchangeRateModal: React.FC<ExchangeRateModalProps> = ({ isOpen, on
             </div>
           </div>
 
+          {/* Live Preview of Conversion */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <div className="flex items-center gap-1.5 text-slate-600 font-semibold">
+              <Info className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Impacto en gastos y tarjetas:</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1 font-mono-num text-[11px] text-slate-700">
+              <div>$10 USD ≈ ₡{Math.round(10 * numRate).toLocaleString('es-CR')}</div>
+              <div>$50 USD ≈ ₡{Math.round(50 * numRate).toLocaleString('es-CR')}</div>
+              <div>$100 USD ≈ ₡{Math.round(100 * numRate).toLocaleString('es-CR')}</div>
+              <div>$500 USD ≈ ₡{Math.round(500 * numRate).toLocaleString('es-CR')}</div>
+            </div>
+          </div>
+
           <div>
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
               Valores Rápidos de Referencia (BCCR / Bancos)
@@ -106,7 +127,7 @@ export const ExchangeRateModal: React.FC<ExchangeRateModalProps> = ({ isOpen, on
               id="btn-save-fx"
               className="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-md transition-all"
             >
-              Actualizar
+              Actualizar Tipo de Cambio
             </button>
           </div>
         </form>

@@ -11,7 +11,7 @@ interface CardPaymentModalProps {
 }
 
 export const CardPaymentModal: React.FC<CardPaymentModalProps> = ({ isOpen, onClose, card }) => {
-  const { payCreditCard, mainAccount } = useFinance();
+  const { payCreditCard, mainAccount, exchangeRate } = useFinance();
   const [amount, setAmount] = useState<string>('');
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [note, setNote] = useState<string>('');
@@ -144,6 +144,19 @@ export const CardPaymentModal: React.FC<CardPaymentModalProps> = ({ isOpen, onCl
                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl text-base font-bold text-slate-900 outline-hidden transition-all"
               />
             </div>
+            {amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
+              <p className="text-[11px] text-slate-500 font-mono-num pl-1 pt-0.5">
+                {card.currency === 'USD' ? (
+                  <>
+                    ≈ <strong className="text-slate-800">₡{Math.round(parseFloat(amount) * exchangeRate.usdToCrc).toLocaleString('es-CR')}</strong> debitados en Colones (T.C: ₡{exchangeRate.usdToCrc})
+                  </>
+                ) : (
+                  <>
+                    ≈ <strong className="text-slate-800">${(parseFloat(amount) / exchangeRate.usdToCrc).toFixed(2)}</strong> USD (T.C: ₡{exchangeRate.usdToCrc})
+                  </>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Date & Note */}

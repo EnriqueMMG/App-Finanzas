@@ -313,6 +313,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteCreditCard = (id: string) => {
     setCreditCards(prev => prev.filter(c => c.id !== id));
+    setScheduledExpenses(prev =>
+      prev.map(s => (s.sourceAccountId === id ? { ...s, sourceAccountId: 'main' } : s))
+    );
   };
 
   // Scheduled Expenses operations

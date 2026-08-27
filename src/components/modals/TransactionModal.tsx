@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowDownRight, ArrowUpRight, CreditCard as CardIcon, Plus, Check } from 'lucide-react';
+import { X, ArrowDownRight, ArrowUpRight, CreditCard as CardIcon, Plus, Check, Trash2 } from 'lucide-react';
 import { useFinance } from '../../context/FinanceContext';
 import { Currency, TransactionType, PaymentMethodType, Transaction } from '../../types';
 import { CategoryIcon } from '../CategoryIcon';
@@ -24,6 +24,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     mainAccount,
     addTransaction,
     editTransaction,
+    deleteTransaction,
     displayCurrency,
     exchangeRate,
   } = useFinance();
@@ -238,6 +239,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Live Exchange Rate Conversion Subtitle */}
+            {amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
+              <p className="text-[11px] text-slate-500 font-mono-num pl-1">
+                {currency === 'USD' ? (
+                  <>
+                    ≈ <strong className="text-slate-800">₡{Math.round(parseFloat(amount) * exchangeRate.usdToCrc).toLocaleString('es-CR')}</strong> en Colones (T.C: ₡{exchangeRate.usdToCrc})
+                  </>
+                ) : (
+                  <>
+                    ≈ <strong className="text-slate-800">${(parseFloat(amount) / exchangeRate.usdToCrc).toFixed(2)}</strong> en Dólares (T.C: ₡{exchangeRate.usdToCrc})
+                  </>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Source Account / Card */}
@@ -422,22 +438,43 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           </div>
 
           {/* Footer actions */}
-          <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
-            <button
-              type="button"
-              id="btn-cancel-tx"
-              onClick={onClose}
-              className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              id="btn-submit-tx"
-              className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 active:scale-98 rounded-xl shadow-md transition-all flex items-center gap-2"
-            >
-              {editingTransaction ? 'Guardar Cambios' : 'Registrar Movimiento'}
-            </button>
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+            {editingTransaction ? (
+              <button
+                type="button"
+                id="btn-delete-tx-modal"
+                onClick={() => {
+                  if (confirm('¿Deseas eliminar este movimiento? Los saldos de tus cuentas o tarjetas se ajustarán automáticamente.')) {
+                    deleteTransaction(editingTransaction.id);
+                    onClose();
+                  }
+                }}
+                className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-xl transition-colors flex items-center gap-1.5"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Eliminar</span>
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                id="btn-cancel-tx"
+                onClick={onClose}
+                className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                id="btn-submit-tx"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 active:scale-98 rounded-xl shadow-md transition-all flex items-center gap-2"
+              >
+                {editingTransaction ? 'Guardar Cambios' : 'Registrar Movimiento'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
